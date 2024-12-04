@@ -70,6 +70,8 @@ func _input(p_event: InputEvent) -> void:
 	if not (p_event is InputEventKey and p_event.pressed and not p_event.echo):
 		return
 
+	var input_handled : bool = true
+
 	match p_event.physical_keycode:
 
 		KEY_QUOTELEFT:
@@ -90,7 +92,6 @@ func _input(p_event: InputEvent) -> void:
 			_history_index = clampi(_history_index + 1, 0, _history.size() - 1)
 			_console_input.text = _history[_history_index]
 			_console_input.caret_column = _console_input.text.length()
-			get_viewport().set_input_as_handled()
 
 		KEY_DOWN:
 			if _history.is_empty():
@@ -99,7 +100,6 @@ func _input(p_event: InputEvent) -> void:
 			_history_index = clampi(_history_index - 1, 0, _history.size() - 1)
 			_console_input.text = _history[_history_index]
 			_console_input.caret_column = _console_input.text.length()
-			get_viewport().set_input_as_handled()
 
 		KEY_TAB:
 			_autocomplete()
@@ -107,10 +107,13 @@ func _input(p_event: InputEvent) -> void:
 
 		_:
 			_last_input_was_autocomplete = false
+			input_handled = false
+
+	if input_handled:
+		get_viewport().set_input_as_handled()
 
 	if visible and not _console_input.has_focus():
 		_console_input.grab_focus()
-		get_viewport().set_input_as_handled()
 
 
 ## Registers a new [param p_command] command in the console.
